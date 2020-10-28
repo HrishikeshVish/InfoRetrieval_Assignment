@@ -98,15 +98,21 @@ def findDoc(documents, search):
         return invertedIndex
     else:
         return partialIndex
-print(findDoc(["""He
-is still unconscious following his ordeal,
-but he will awaken soon and retake
-control of the Fowl finances""", """However, there is time for one last
-job. Something that my mother would not
-approve of. I don't think the fairy folk
-would like it much either. So I shall not"""], "is"))
+def buildIndex(documents):
+    invertedIndex = {}
+    for i in range(len(documents)):
+        words = documents[i].split(" ")
+        for j in words:
+            if j not in invertedIndex:
+                invertedIndex[j] = []
+            if i not in invertedIndex[j]:
+                invertedIndex[j].append(i)
+    return invertedIndex
+            
+        
+print(findDoc(["""He is still unconscious following his ordeal, but he will awaken soon and retake control of the Fowl finances""", """However, there is time for one last job. Something that my mother would not approve of. I don't think the fairy folk would like it much either. So I shall not"""], "is"))
                 
-                
+print(buildIndex(["""He is still unconscious following his ordeal, but he will awaken soon and retake control of the Fowl finances""", """However, there is time for one last job. Something that my mother would not approve of. I don't think the fairy folk would like it much either. So I shall not"""]))         
             
     
 print(LCS("Hweorjweorjoiabcde", "dowjdowedjwiedoAAcde"))
