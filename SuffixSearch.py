@@ -1,4 +1,9 @@
 import os
+import nltk
+from nltk.stem import PorterStemmer
+from nltk.stem import WordNetLemmatizer
+import nltk
+
 
 def LCS(strA, strB):
     revA = strA[::-1]
@@ -108,11 +113,25 @@ def buildIndex(documents):
             if i not in invertedIndex[j]:
                 invertedIndex[j].append(i)
     return invertedIndex
-            
-        
-print(findDoc(["""He is still unconscious following his ordeal, but he will awaken soon and retake control of the Fowl finances""", """However, there is time for one last job. Something that my mother would not approve of. I don't think the fairy folk would like it much either. So I shall not"""], "is"))
-                
-print(buildIndex(["""He is still unconscious following his ordeal, but he will awaken soon and retake control of the Fowl finances""", """However, there is time for one last job. Something that my mother would not approve of. I don't think the fairy folk would like it much either. So I shall not"""]))         
-            
+
+def preProcess(documents):
+    porter = PorterStemmer()
+    lemmatizer = WordNetLemmatizer()
+    for i in range(len(documents)):
+        stemmed = []
+        words = documents[i].split(" ")
+        for j in words:
+            stemmed.append(porter.stem(lemmatizer.lemmatize(j)))
+        print(stemmed)
+
+def generateBiWordIndex(searchTerm):
+    bigrm = list(nltk.bigrams(searchTerm.split()))
+    print(*map(' '.join, bigrm), sep=", ")
     
-print(LCS("Hweorjweorjoiabcde", "dowjdowedjwiedoAAcde"))
+        
+#print(findDoc(["""He is still unconscious following his ordeal, but he will awaken soon and retake control of the Fowl finances""", """However, there is time for one last job. Something that my mother would not approve of. I don't think the fairy folk would like it much either. So I shall not"""], "is"))
+                
+print(preProcess(["""He is still unconscious following his ordeal, but he will awaken soon and retake control of the Fowl finances""", """However, there is time for one last job. Something that my mother would not approve of. I don't think the fairy folk would like it much either. So I shall not"""]))         
+            
+generateBiWordIndex("Could you be there cause I'm the one who waits for you, or are you unforgiven too")  
+#print(LCS("Hweorjweorjoiabcde", "dowjdowedjwiedoAAcde"))
