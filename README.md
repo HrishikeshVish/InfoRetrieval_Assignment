@@ -25,13 +25,13 @@ Your Code should contain functionality to
  - Measure the efficiency using precision,recall,F measure.
  
 ### Demo:
--Run your code and carryout the search with different queries. 
--Retrieve the data, compile and compare metrics with any one of the search engine  like Elasticsearch, Apache Solr,Apache Lucene, Google Cloud Search, Google Desktop Search for the same corpus.
--Measure the efficiency.
+ - Run your code and carryout the search with different queries. 
+ - Retrieve the data, compile and compare metrics with any one of the search engine  like Elasticsearch, Apache Solr,Apache Lucene, Google Cloud Search, Google Desktop Search for the same corpus.
+ - Measure the efficiency.
 
 ### Report:
--You should submit a hard copy, 4
--page summary of your project 
--Your report should include the code snippet/algorithm used, similarity check of retrieved data obtained with your search engine and any one search engine like Elasticsearch,Apache Solr, Apache Lucene, Google Cloud Search, Google Desktop Search.
--Interpretation of efficiency.
+ - You should submit a hard copy, 4
+ - page summary of your project 
+ - Your report should include the code snippet/algorithm used, similarity check of retrieved data obtained with your search engine and any one search engine like Elasticsearch,Apache Solr, Apache Lucene, Google Cloud Search, Google Desktop Search.
+ - Interpretation of efficiency.
 Last para of your report should contain your observations on the Learning Outcomes of this project.
