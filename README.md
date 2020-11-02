@@ -8,21 +8,21 @@
 
 ### Problem Statement
 #### Problem:
-a) Build a search engine for Environmental News NLP archieve.
-b) Built a corpus for archieve with atleast 418 documents.
+ a) Build a search engine for Environmental News NLP archieve.
+ b) Built a corpus for archieve with atleast 418 documents.
 
 #### Data:
-a) Use the following link for Environmental News NLP dataset. https://www.kaggle.com/amritvirsinghx/environmental-news-nlp-dataset
+ a) Use the following link for Environmental News NLP dataset. https://www.kaggle.com/amritvirsinghx/environmental-news-nlp-dataset
 
 ### Deliverables: 
 Your Code should contain functionality to 
- -Search for the terms in the query
- -Create Postings list
- -Fill the Inverted Index
- -Rank the pages
- -Retrieve the data from the dictionary
- -Query response time 
- -Measure the efficiency using precision,recall,F measure.
+ - Search for the terms in the query
+ - Create Postings list
+ - Fill the Inverted Index
+ - Rank the pages
+ - Retrieve the data from the dictionary
+ - Query response time 
+ - Measure the efficiency using precision,recall,F measure.
  
 ### Demo:
 -Run your code and carryout the search with different queries. 
