@@ -1,10 +1,8 @@
 # InfoRetrieval_Assignment
-## Assignment for the course Algorithms for Information Retrieval
+## Assignment for the Course Algorithms for Information Retrieval
 
-#### Ashwin R. Bharadwaj
-#### Hardik Gourisaria
-#### Hrishikesh V
-#### Shrinidhi Bhagawath
-
-
-
+### Team:
+* Ashwin R. Bharadwaj
+* Hardik Gourisaria
+* Hrishikesh V
+* K Shrinidhi Bhagavath
