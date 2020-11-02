@@ -106,6 +106,7 @@ def findDoc(documents, search):
 def buildIndex(documents):
     invertedIndex = {}
     for i in range(len(documents)):
+        print(i)
         words = documents[i].split(" ")
         for j in words:
             if j not in invertedIndex:
@@ -131,7 +132,7 @@ def generateBiWordIndex(searchTerm):
         
 #print(findDoc(["""He is still unconscious following his ordeal, but he will awaken soon and retake control of the Fowl finances""", """However, there is time for one last job. Something that my mother would not approve of. I don't think the fairy folk would like it much either. So I shall not"""], "is"))
                 
-print(preProcess(["""He is still unconscious following his ordeal, but he will awaken soon and retake control of the Fowl finances""", """However, there is time for one last job. Something that my mother would not approve of. I don't think the fairy folk would like it much either. So I shall not"""]))         
+#print(preProcess(["""He is still unconscious following his ordeal, but he will awaken soon and retake control of the Fowl finances""", """However, there is time for one last job. Something that my mother would not approve of. I don't think the fairy folk would like it much either. So I shall not"""]))         
             
-generateBiWordIndex("Could you be there cause I'm the one who waits for you, or are you unforgiven too")  
+#generateBiWordIndex("Could you be there cause I'm the one who waits for you, or are you unforgiven too")  
 #print(LCS("Hweorjweorjoiabcde", "dowjdowedjwiedoAAcde"))

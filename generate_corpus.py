@@ -99,14 +99,18 @@ def generate_intermediate_corpus():
             # Read contents of each file in the dataset and check if comforms to the required format
             partial_corpus = pd.read_csv('./TelevisionNews/' + file_name)
             if 'Snippet' in partial_corpus.columns:
+                print("Len of Corpus = ", len(partial_corpus['Snippet']))
                 for row_number in range(len(partial_corpus['Snippet'])):
+                    print("Reading Row Number",row_number)
                     snl_snippet = []
                     snippet = partial_corpus['Snippet'][row_number]
                     # Stem and Lemmatize each token in the snippet
+                    print("Lemmatizing and Stemming...")
                     for word in tokenizer.tokenize(snippet.lower()):
+                        
                         snl_snippet.append(stemmer.stem(lemmatizer.lemmatize(word)))
                     # Append to the intermediate corpus data
-                    snl_snippets.append(snl_snippet)
+                    snl_snippets.append(' '.join(snl_snippet)   )
                     row_numbers.append(row_number)
                     file_names.append(file_name)
         except pd.errors.EmptyDataError:
