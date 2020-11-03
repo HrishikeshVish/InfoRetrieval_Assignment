@@ -8,9 +8,9 @@
 
 ## Beta Version using Trie
 
-### How to run test program
+### How to use search engine
 
 ```bash
-python3 test.py
+python3 main.py <search_term>
 ```
 

@@ -11,9 +11,12 @@ from pandas import read_csv
 
 class InvertedIndex(object):
     """
-    docstring
+        Inverted Index using trie as data-structure
     """
     def __init__(self):
+        """
+            Constructor to initialize trie, tokenizer and lemmatizer
+        """
         self._trie = Trie()
         self._tokenizer = RegexpTokenizer(r'[^\W_]+')
         self._stemmer = PorterStemmer()
@@ -24,29 +27,13 @@ class InvertedIndex(object):
 
     def from_csv(self, path, doc_id):
         """
-            Creates per column
+            read CSV and created inverted index for 'Snippet' column
         """
         try:
             csv = read_csv(path)
         except Exception as e:
             print(e)
             return
-        # with ProcessPoolExecutor(max_workers=32) as worker:
-        #     workers = {
-        #                 worker.submit(self._tokenizer.tokenize, 
-        #                 csv['Snippet'][i_row]):i_row
-        #                     for i_row in range(len(csv['Snippet']))
-        #               }
-            
-        #     with ThreadPoolExecutor(max_workers=8) as worker2:
-        #         for tokenize_res in as_completed(workers):
-        #             row_col = workers[tokenize_res]
-        #             tokens = tokenize_res.result()
-        #             if doc_id == 1 and row_col == 94:
-        #                 print([self._stemmer.stem(self._lemmatizer.lemmatize(token)) for token in tokens])
-        #             for token in tokens:
-        #                 term = self._stemmer.stem(self._lemmatizer.lemmatize(token))
-        #                 worker2.submit(self._trie.add_string, term[0], term[1:], doc_id, row_col)
         
         self._post2doc_mapper.append(self._post2doc_mapper[-1] + len(csv['Snippet']))
         self._docs.append(doc_id)
@@ -59,9 +46,14 @@ class InvertedIndex(object):
 
     def search(self, string):
         """
+            Search string in trie
+            map the hashed row-doc_id number returned from trie search as {doc_id: [rows]}
+            return resultant {doc_id: [rows]}
+
         """
+        if '*' not in string:
+            string = self._stemmer.stem(self._lemmatizer.lemmatize(string))
         poss = self._trie.search(string)
-        print(self._post2doc_mapper)
         res = {}
         for pos in poss:
             for i_doc in range(len(self._post2doc_mapper)):
@@ -78,6 +70,8 @@ class InvertedIndex(object):
 
     def save(self, filepath):
         """
+            Save Inverted Index - Posting List as posting_list.json
+            and hashed row-doc_id as pos2doc.json
         """
         f = open(filepath+"posting_list.json", 'w')
         f.write(dumps(self._trie.to_dict()))
@@ -88,6 +82,7 @@ class InvertedIndex(object):
 
     def load(self, filepath):
         """
+            Load data from saved posting list and hashed row-doc_id mapper
         """
         f = open(filepath+"posting_list.json", 'r')
         self._trie.from_dict(loads(f.read()))
@@ -95,9 +90,9 @@ class InvertedIndex(object):
         f = open(filepath+"pos2doc.json", 'r')
         mapper = loads(f.read())
         f.close()
-        posndoc = sorted([(i, mapper[i]) for i in mapper.keys()])
-        self._post2doc_mapper = [int(i[1]) for i in posndoc]
-        self._docs = [i[0] for i in posndoc]
+        posndoc = sorted([(int(mapper[i]),i) for i in mapper.keys()])
+        self._post2doc_mapper = [i[0] for i in posndoc]
+        self._docs = [i[1] for i in posndoc]
 
 
 

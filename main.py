@@ -2,17 +2,38 @@ from os import listdir
 from modules import Trie
 from modules.TrieDS import merge
 from modules import InvertedIndex
+from pandas import read_csv
+import sys
+
+_data_path = "/root/Documents/Project/archive/TelevisionNews/"
 
 
-_data_path = "./data/"
+
+def pos_in_csv(pos):
+    """
+    """
+    paths = sorted([_data_path+i for i in listdir(_data_path)])
+    for i_doc in pos.keys():
+        print(paths[int(i_doc)-1], "\n\n")
+        csv = read_csv(paths[int(i_doc)])
+        for i_row in pos[i_doc]:
+            for col in csv.columns:
+                print("\t", col, " : ", csv[col][i_row])
+            print("\n\n")
+        print("\n\n")
+
+
 
 
 if __name__ == "__main__":
     """
     """
+    search_term = "un*ed"
+    if len(sys.argv) == 2:
+        search_term = sys.argv[1]
+
     engine = InvertedIndex()
-    if "posting_list.json" not in listdir("engine/") or \
-        "pos2doc.json" not in listdir("engine/"):
+    if not ("posting_list.json" in listdir("engine/") and "pos2doc.json" in listdir("engine/")):
         paths = sorted([_data_path+i for i in listdir(_data_path)])
 
         for i_path in range(len(paths)):
@@ -22,8 +43,8 @@ if __name__ == "__main__":
     else:
         engine.load("engine/")
 
-    search_term = "un*ed"
     ans = engine.search(search_term)
-    for i in ans.keys():
-        print(i, " : ", ans[i], "\n\n\n")
+    print("START")
+    pos_in_csv(ans)
+    print("END")
     
