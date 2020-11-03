@@ -13,10 +13,6 @@ def print_trie(t,c):
 
 
 
-
-
-
-
 ############### ADD TOKEN TEST ###############
 
 # def main():
@@ -42,29 +38,39 @@ def print_trie(t,c):
 
 ############### SEARCH TEST ###############
 
-def main():
-    a = Trie()
-    s = """There was something in the tree. 
-    It was difficult to tell from the ground, but Rachael could see movement. 
-    She squinted her eyes and peered in the direction of the movement, 
-    trying to decipher exactly what she had spied. The more she peered, however, 
-    the more she thought it might be a figment of her imagination. Nothing seemed 
-    to move until the moment she began to take her eyes off the tree. Then in the corner of her eye, 
-    she would see the movement again and begin the process of staring again."""
-    s = "trree trrees trreesss tre tre"
-    # s = "BBC News BBC Newsroom"
-    b = _tokenizer.tokenize(s)
-    print(b)
-    t = "*ire*i*on"
-    print(len(b))
-    for i in range(len(b)):
-        if b[i].count("News")> 0:
-            print(i, b[i])
-        a.add_string(b[i][0], b[i][1:], i, i, i)
-    # print_trie(a, 0)
-    # print(a.getdn()['*'])
-    ans = a.search(t)
-    print(list(ans.keys()))
+# def main():
+#     from json import dumps
+#     a = Trie()
+#     s = """There was something in the tree. 
+#     It was difficult to tell from the ground, but Rachael could see movement. 
+#     She squinted her eyes and peered in the direction of the movement, 
+#     trying to decipher exactly what she had spied. The more she peered, however, 
+#     the more she thought it might be a figment of her imagination. Nothing seemed 
+#     to move until the moment she began to take her eyes off the tree. Then in the corner of her eye, 
+#     she would see the movement again and begin the process of staring again."""
+#     # s = "trree trrees trreesss tre tre"
+#     # s = "BBC News BBC Newsroom"
+#     # s = "staring she"
+#     b = tokenize.word_tokenize(s)
+#     print(b)
+#     t = "*re*"
+#     print(len(b))
+#     for i in range(len(b)):
+#         # if b[i].count("re")> 0:
+#         #     print(i, b[i])
+#         a.add_string(b[i], i)
+#     f = open("lol.json", "w")
+#     f.write(dumps(a.to_dict()))
+#     f.close()
+#     # print_trie(a, 0)
+#     # print(a.getdn()['*'])
+#     ans = a.search(t)
+#     print(ans)
+#     for i in ans:
+#         print(b[i])
+#     # for i in ans.keys():
+#     #     for j in ans[i]:
+#     #         print(b[j], j)
 
 ##########################################
 
@@ -178,25 +184,31 @@ def main():
 # def main():
 #     import datetime
 #     from json import dumps
-#     paths = [
-#             "/root/Documents/Project/archive/TelevisionNews/BBCNEWS.201701.csv",
-#             "/root/Documents/Project/archive/TelevisionNews/BBCNEWS.201702.csv",
-#             "/root/Documents/Project/archive/TelevisionNews/BBCNEWS.201703.csv",
-#             "/root/Documents/Project/archive/TelevisionNews/BBCNEWS.201704.csv"
-#     ]
+#     import time
+#     import os
+#     import gc
+#     data_path = "/root/Documents/Project/archive/TelevisionNews/"
+#     paths = [data_path+i 
+#                 for i in os.listdir(data_path)]
 #     # path = "data/lol.csv"
+#     paths = sorted(paths)
 #     a = datetime.datetime.now()
 #     tt = InvertedIndex()
 #     for i_path in range(len(paths)):
+#         print(paths[i_path])
 #         tt.from_csv(paths[i_path], i_path)
+#         gc.collect()
 #     # trie_s = create_inverted_index_on_csv(path, 0)
+#     # print(tt.trie)
 #     print(datetime.datetime.now()-a)
+#     # time.sleep(600)
 #     # f = open("lol.json", "w")
 #     # f.write(dumps(test_trie.to_dict()))
 #     # f.close()
-#     # tt.save("lol.json")
+#     tt.save("./")
+#     # print(tt.trie.data_node)
 #     a = datetime.datetime.now()
-#     ans = tt.trie.search("News*")
+#     ans = tt.search("un*ed")
 #     print(datetime.datetime.now()-a)
 #     for i in ans.keys():
 #         print(i, " : ", ans[i], "\n\n\n")
@@ -204,7 +216,36 @@ def main():
 ###########################################################
 
 
+############### LOAD INVERTED INDEX ###############
 
+def main():
+    import datetime
+    from json import dumps
+    import time
+    import os
+    import gc
+
+    # path = "data/lol.csv"
+    # paths = sorted(paths)
+    a = datetime.datetime.now()
+    tt = InvertedIndex()
+    tt.load("./")
+    # trie_s = create_inverted_index_on_csv(path, 0)
+    # print(tt.trie)
+    print(datetime.datetime.now()-a)
+    # time.sleep(600)
+    # f = open("lol.json", "w")
+    # f.write(dumps(test_trie.to_dict()))
+    # f.close()
+    # tt.save("./")
+    # print(tt.trie.data_node)
+    a = datetime.datetime.now()
+    ans = tt.search("un*ed")
+    print(datetime.datetime.now()-a)
+    for i in ans.keys():
+        print(i, " : ", ans[i], "\n\n\n")
+
+########################################################
 
 
 
