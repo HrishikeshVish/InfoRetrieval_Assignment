@@ -6,6 +6,13 @@
 * Hrishikesh V
 * K Shrinidhi Bhagavath
 
+## Trie based inverted index
+
+### How to use search engine
+
+```bash
+python3 main.py <search_term>
+```
 ### Problem Statement
 #### Problem:
  - a) Build a search engine for Environmental News NLP archieve.
