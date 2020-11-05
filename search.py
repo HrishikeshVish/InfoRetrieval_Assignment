@@ -85,6 +85,8 @@ def generate_artifacts():
 
         except pd.errors.EmptyDataError:
             continue
+    for snl_word in posting_list.keys():
+        posting_list[snl_word] = list(set(posting_list[snl_word]))
     
     # Save the full posting list as a json file
     posting_list_file = open('./posting_list.json', 'w+')
@@ -105,12 +107,37 @@ def generate_artifacts():
                 bigram_index[bigram].append(snl_word)
             else:
                 bigram_index[bigram] = [snl_word]
+    for bigram in bigram_index.keys():
+        bigram_index[bigram] = list(set(bigram_index[bigram]))
     
     # Save the full bigram_index as a json file
     bigram_index_file = open('./bigram_index.json', 'w+')
     json.dump(bigram_index, bigram_index_file, indent=4)
     bigram_index_file.close()
     print('Bigram Index Generated')
+
+    # Initialize the permuterm_index as an empty dictionary
+    permuterm_index = dict()
+
+    # Iterate through the vocabulary and generate the permuterm index
+    for snl_word in tqdm(posting_list.keys()):
+        for length in range(1, len(snl_word)+1):
+            ngrams = [''.join(ngram) for ngram in nltk.ngrams(snl_word, length)]
+            for ngram in ngrams:
+                if(ngram in permuterm_index.keys()):
+                    permuterm_index[ngram].append(snl_word)
+                else:
+                    permuterm_index[ngram] = [snl_word]
+    for permuterm in permuterm_index.keys():
+        permuterm_index[permuterm] = list(set(permuterm_index[permuterm]))
+    
+    # Save the full permuterm_index as a json file
+    permuterm_index_file = open('./permuterm_index.json', 'w+')
+    json.dump(permuterm_index, permuterm_index_file, indent=4)
+    permuterm_index_file.close()
+    print('Permuterm Index Generated')
+
+    return posting_list, bigram_index, permuterm_index
 
 def search():
     import os
@@ -130,17 +157,21 @@ def search():
     # Declare the Stemmer, Lemmatizer and Tokenizer
     stemmer = PorterStemmer()
     lemmatizer = WordNetLemmatizer()
-    tokenizer = RegexpTokenizer(r'[a|b|c|d|e|f|g|h|i|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|?|\*]+')
+    term_tokenizer = RegexpTokenizer(r'[a|b|c|d|e|f|g|h|i|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|?|\*]+')
+    wildcard_tokenizer = RegexpTokenizer(r'[a|b|c|d|e|f|g|h|i|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z]+')
     stemmer.stem(lemmatizer.lemmatize("sample done"))
 
     # Obtain the posting list and bigram index
     directory_file_list = os.listdir(".")
-    if ("posting_list.json" not in directory_file_list) or ("bigram_index.json" not in directory_file_list):
-        generate_artifacts()
-    posting_list_file = open("./posting_list.json", "r")
-    posting_list = json.loads(posting_list_file.read())
-    bigram_index_file = open("./bigram_index.json", "r")
-    bigram_index = json.loads(bigram_index_file.read())
+    if ("posting_list.json" not in directory_file_list) or ("bigram_index.json" not in directory_file_list) or ("permuterm_index.json" not in directory_file_list):
+        posting_list, bigram_index, permuterm_index = generate_artifacts()
+    else:
+        posting_list_file = open("./posting_list.json", "r")
+        posting_list = json.loads(posting_list_file.read())
+        bigram_index_file = open("./bigram_index.json", "r")
+        bigram_index = json.loads(bigram_index_file.read())
+        permuterm_index_file = open("./permuterm_index.json", "r")
+        permuterm_index = json.loads(permuterm_index_file.read())
 
     # Take input query
     query = input("Please enter the query string: ")
@@ -149,15 +180,34 @@ def search():
 
     # Get the desired documents list
     document_list = []
-    for query_term in tokenizer.tokenize(query.lower()):
+    for query_term in term_tokenizer.tokenize(query.lower()):
         # If query term is a wildcard query
         if "*" in query_term or "?" in query_term:
-            matching_snl_words = []
-            for snl_word in posting_list.keys():
-                if pattern_match(query_term, snl_word):
-                    matching_snl_words.append(snl_word)
-            print("\nSearching", matching_snl_words, "instead of", query_term, "\n")
-            for snl_word in matching_snl_words:
+            # Get all the segments of the wildcard query term
+            wildcard_segments = wildcard_tokenizer.tokenize(query_term)
+            # Get all the terms that have the wildcard segment as a substring
+            possible_snl_matches = []
+            for wildcard_segment in wildcard_segments:
+                if wildcard_segment in permuterm_index.keys():
+                    possible_snl_matches.extend(permuterm_index[wildcard_segment])
+            # Get the matches that have all the wildcard segments as a substring
+            possible_snl_matches_count = dict()
+            for possible_snl_match in possible_snl_matches:
+                if possible_snl_match in possible_snl_matches_count.keys():
+                    possible_snl_matches_count[possible_snl_match] = possible_snl_matches_count[possible_snl_match] + 1
+                else:
+                    possible_snl_matches_count[possible_snl_match] = 1
+            best_possible_snl_matches = []
+            for possible_snl_match in possible_snl_matches_count.keys():
+                if possible_snl_matches_count[possible_snl_match] == len(wildcard_segments):
+                    best_possible_snl_matches.append(possible_snl_match)
+            # Get the exact matches to the wildcard query
+            exact_snl_matches = []
+            for best_possible_snl_match in best_possible_snl_matches:
+                if pattern_match(query_term, best_possible_snl_match):
+                    exact_snl_matches.append(best_possible_snl_match)
+            print("\nSearching", exact_snl_matches, "instead of", query_term, "\n")
+            for snl_word in exact_snl_matches:
                 document_list.extend(posting_list[snl_word])
         # If query term is a normal query
         else:
@@ -175,7 +225,7 @@ def search():
                     if bigram in bigram_index.keys():
                         for alt_term in bigram_index[bigram]:
                             alt_terms.add(alt_term)
-                # Get best alternative terms based on minumum edit distance
+                # Get best alternative terms based on minimum edit distance
                 best_alt_terms = []
                 min_edit_dist = 100
                 for alt_term in alt_terms:
