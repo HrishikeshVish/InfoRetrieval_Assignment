@@ -4,9 +4,9 @@
 * Searching on Multiple Search Terms
 * Wildcard Searching (using * and ?)
 * Typos Handling (using Bigrams and Minimum Edit Distance)
+* Ranking using TF-IDF and Cosine Similarity
 
 ### Pending Work:
-* Ranking using TF-IDF and Cosine Similarity
 * Elastics Search Implementation
 * Search Engine Evaluation
 * Report Writing
