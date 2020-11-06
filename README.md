@@ -1,3 +1,4 @@
+
 ## Assignment for the Course Algorithms for Information Retrieval (UE17CS412)
 
 ### Team:
@@ -35,3 +36,17 @@ Your Code should contain functionality to
  - Your report should include the code snippet/algorithm used, similarity check of retrieved data obtained with your search engine and any one search engine like Elasticsearch,Apache Solr, Apache Lucene, Google Cloud Search, Google Desktop Search.
  - Interpretation of efficiency.
 Last para of your report should contain your observations on the Learning Outcomes of this project.
+=======
+# Algorithms for Information Retrieval Assignment
+
+### Current Work Done:
+* Searching on Multiple Search Terms
+* Wildcard Searching (using * and ?)
+* Typos Handling (using Bigrams and Minimum Edit Distance)
+* Ranking using TF-IDF and Cosine Similarity
+
+### Pending Work:
+* Elastics Search Implementation
+* Search Engine Evaluation
+* Report Writing
+
