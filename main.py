@@ -5,6 +5,7 @@
 from os import listdir
 from modules import InvertedIndex
 from config import DATA_PATH, REQUIRED_FILE_FOR_ENGINE, ENGINE_PATH
+from config import RANKING_ALGO, SHOW_DETAIL, TOTAL_N_RESULT, RANKING
 from utils import logger
 import sys
 
@@ -33,7 +34,11 @@ if __name__ == "__main__":
         except Exception as exe:
             logger(exe)
             exit(0)
-        ans = engine.run_query(query, ranking=True, ranking_algo='cos', top_n=10, show_detail=False)
+        ans = engine.run_query(query,
+                              ranking=RANKING,
+                              ranking_algo=RANKING_ALGO,
+                              top_n=TOTAL_N_RESULT,
+                              show_detail=SHOW_DETAIL)
         if ans:
             print("\n\nPrinting relevant results\n\n")
         for i in ans:

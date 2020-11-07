@@ -27,6 +27,21 @@ python3 initialize.py
 ```bash
 python3 main.py
 ```
+
+
+### How to change search query parameter
+
+Go to config.py in config directory.
+
+#### Changeable configs:
+ - DATA_PATH = Path to csv files
+ - ENGINE_PATH = Path were data required by engine is stored
+ - LOG_FILE = Path where log file is stored
+ - RANKING = Boolean (True or False), specifies if you want to rank the output or not
+ - SHOW_DETAIL = Boolean (True or False), specifies if you want to extract data from csv and show along with the result
+ - RANKING_ALGO = Specifies type of ranking algorithm you want to adopt. Options = "cos", "match"
+ - TOTAL_N_RESULT = Number of top results to be displayed
+
 ### Problem Statement
 #### Problem:
  - a) Build a search engine for Environmental News NLP archieve.
