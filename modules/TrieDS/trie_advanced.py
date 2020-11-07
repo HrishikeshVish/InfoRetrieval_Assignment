@@ -1,3 +1,6 @@
+"""
+    Trie Data Structur is defined here
+"""
 from copy import deepcopy
 
 
@@ -63,12 +66,12 @@ class Trie:
 
         Structure(Ex):
             'abs', 'abc', 'bbc'
-            Trie('abs', 'abc', 'bbc') -> {'a':[Trie('bs', 'bc'),[0,1]], 
+            Trie('abs', 'abc', 'bbc') -> {'a':[Trie('bs', 'bc'),[0,1]],
                                             'b': [Trie('bc'), [2]]]}
 
             Trie('bs', 'bc') - > {'b': [Trie('s', 'c'), [0,1]]}
             Trie('bc') -> {'b': [Trie('c'), [2]]}
-            Trie('s', 'c') -> {'s': [Trie(), [0]], 
+            Trie('s', 'c') -> {'s': [Trie(), [0]],
                                 'c' : [Trie(), [1]]}
             Trie('c') -> {'c': [Trie(), [2]]}
 
@@ -93,13 +96,13 @@ class Trie:
         """
            Check validity of data-node
         """
-        if type(dn) != dict:
+        if not isinstance(dn, dict):
             return False
 
         for i in dn.keys():
-            if type(i) != str:
+            if not isinstance(i, str):
                 return False
-            if type(dn[i][0]) != Trie:
+            if not isinstance(dn[i][0], Trie):
                 return False
         return True
 

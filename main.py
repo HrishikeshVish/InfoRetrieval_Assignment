@@ -4,43 +4,61 @@
 
 from os import listdir
 from modules import InvertedIndex
+from config import DATA_PATH, REQUIRED_FILE_FOR_ENGINE, ENGINE_PATH
+from utils import logger
+import sys
 
 
-loader = True
-_data_path = "/root/Documents/Project/archive/TelevisionNews/"
-_req_file = ["posting_list.json", "pos2doc.json", "vocab.json", "tf_idf_vector.json", "bigrams.json"]
+_IS_ENGINE = True
 
 if __name__ == "__main__":
     """
-        Main
+        Main function that run search engine
     """
-    paths = sorted([_data_path+i for i in listdir(_data_path)])
+    paths = sorted([DATA_PATH+i for i in listdir(DATA_PATH)])
     engine = InvertedIndex(paths)
-    is_engine = True
-    for file_i in _req_file:
-        if file_i not in listdir("engine"):
-            is_engine = False
+    for file_i in REQUIRED_FILE_FOR_ENGINE:
+        if file_i not in listdir(ENGINE_PATH):
+            _IS_ENGINE = False
             engine.initialize()
-            engine.save("engine/")
+            engine.save(ENGINE_PATH)
             break
 
-    if is_engine:
+    if _IS_ENGINE:
         engine.load("engine/")
 
-    # query = input("Query = ")
-    query = "mediteranean"
-    ans = engine.run_query(query, ranking=True, ranking_algo='cos', top_n=10)
-    for i in ans:
+    while 1:
         try:
-            print('Path : ', i['Path'])
-        except:
+            query = input("[Note: Press Ctrl+C to abort]\nEnter Search Query : ")
+        except Exception as exe:
+            logger(exe)
+            exit(0)
+        ans = engine.run_query(query, ranking=True, ranking_algo='cos', top_n=10, show_detail=False)
+        if ans:
+            print("\n\nPrinting relevant results\n\n")
+        for i in ans:
+            try:
+                print('Path : ', i['Path'])
+            except Exception as exe:
+                logger(exe)
+                continue
+            print('Row_no : ', i['Row_no'])
+            try:
+                print('rank_points : ', i['rank_points'])
+            except Exception as exe:
+                logger(exe)
+            for j in i.keys():
+                if j != 'Path' and j != 'Row_no' and j != 'rank_points':
+                    print(j, ":", i[j])
+            print("\n\n")
+
+        _y_n = input("Want to continue?[y/N]")
+        if not _y_n:
+            break
+        if _y_n.lower() == "n":
+            break
+        if _y_n.lower() == "y":
+            sys.stderr.write("\x1b[2J\x1b[H")
             continue
-        print('Row_no : ', i['Row_no'])
-        try:
-            print('rank_points : ', i['rank_points'])
-        except:
-            pass
-        for j in i.keys():
-            if j != 'Path' and j != 'Row_no' and j != 'rank_points':
-                print(j, ":", i[j])
-        print("\n\n")
+        print("wrong input")
+        sys.exit(1)

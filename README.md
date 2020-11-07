@@ -8,10 +8,24 @@
 
 ## Trie based inverted index
 
+
+### Install Requirements
+
+```bash
+pip3 install -r requirements.txt
+```
+
+
+### Download required nltk data
+
+```bash
+python3 initialize.py
+```
+
 ### How to use search engine
 
 ```bash
-python3 main.py <search_term>
+python3 main.py
 ```
 ### Problem Statement
 #### Problem:

@@ -1,14 +1,17 @@
-from math import log
-from math import sqrt
+"""
+    Defines Inerted Index class and helper functions
+"""
+
+from math import sqrt, log
+from gc import collect
+from json import dumps, loads
 from nltk.tokenize import RegexpTokenizer
 from nltk.stem import PorterStemmer, WordNetLemmatizer
 from nltk import bigrams
-from json import dumps, loads
 from pandas import read_csv
 from tqdm import tqdm
-from utils import cosine_sim, string_vector
+from utils import cosine_sim, string_vector, logger
 from .TrieDS import Trie
-
 
 
 
@@ -69,7 +72,6 @@ class InvertedIndex(object):
         """
             Calculate Inverted Index and store in trie
         """
-        from gc import collect
         if paths is None:
             paths = self._paths
         else:
@@ -82,8 +84,8 @@ class InvertedIndex(object):
             self.from_csv(paths[i_path], i_path)
 
         for word in tqdm(self._vocab,
-                        bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
-                        desc="Creating Bigram Index"):
+                         bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
+                         desc="Creating Bigram Index"):
             _bigrams = ["".join(i) for i in bigrams(word)]
             for bigram in _bigrams:
                 if bigram in self._bigrams.keys():
@@ -108,7 +110,7 @@ class InvertedIndex(object):
         try:
             csv = read_csv(path)
         except Exception as e:
-            print(e, path)
+            logger(str(e) + str(path))
             return
 
         # for i_row in tqdm(range(len(csv['Snippet'])),
@@ -187,7 +189,7 @@ class InvertedIndex(object):
                 vector[string] = tf_idf
                 norm += (tf_idf**2)
             except Exception as e:
-                pass
+                logger(e)
 
         norm = sqrt(norm)
 
@@ -211,91 +213,43 @@ class InvertedIndex(object):
                 max_len = max(len(word), len(token))
                 sv_1 = string_vector(word, max_len)
                 sv_2 = string_vector(token, max_len)
-                res.append((word, cosine_sim(sv_1, sv_2)))
+                res.append((word, cosine_sim(sv_1, sv_2)*possible_words[word]))
         res = sorted(res, key=lambda x: x[1], reverse=True)
         if res:
             return res[0][0]
         return None
         
-    def _run_query_match(self, query, top_n=-1):
+    def _run_query_cos(self, query, top_n=-1, show_detail=True):
         """
-        """
-        tokens = [self._stemmer.stem(self._lemmatizer.lemmatize(i))
-                  for i in self._qtokenizer.tokenize(query) if len(i) > 0]
-
-        poss = set()
-
-        for token in tqdm(tokens, bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
-                          desc="Searching for tokens from query in the Tire "):
-            poss.update(self.search(token, mapped=False, lemstem=False))
-
-        if poss:
-            res = {}
-            for pos in tqdm(poss, smoothing=0.7,
-                            bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
-                            desc="Mapping hashed doc to doc_is:[rows] "):
-                doc_row = self._post2doc_mapper[pos]
-
-                if doc_row[0] in res.keys():
-                    res[doc_row[0]].add(doc_row[1])
-                else:
-                    res[doc_row[0]] = {doc_row[1]}
-
-            results = []
-            for i_doc in tqdm(res.keys(), smoothing=0.7,
-                              bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
-                              desc="Getting required row from csv files "):
-                csv = read_csv(self._paths[int(i_doc)])
-                for i_row in res[i_doc]:
-                    r = {}
-                    r['Path'] = self._paths[int(i_doc)]
-                    r['Row_no'] = i_row
-                    for col in csv.columns:
-                        r[col] = csv[col][i_row]
-                    results.append(r)
-
-            qtf_idf_vector, qnorm = self.get_tfidf_vector(tokens)
-
-            for i in tqdm(range(len(results)), smoothing=0.7,
-                          bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
-                          desc="Calculating cosine similarity on tf_idf score"):
-                tokens = [self._stemmer.stem(self._lemmatizer.lemmatize(i))
-                          for i in self._tokenizer.tokenize(results[i]['Snippet'])]
-                dtf_idf_vector, dnorm = self.get_tfidf_vector(tokens)
-                s = 0
-                for j in qtf_idf_vector.keys():
-                    if j in dtf_idf_vector.keys():
-                        s += dtf_idf_vector[j]*qtf_idf_vector[j]
-                cos_sin = 0
-                if qnorm != 0:
-                    cos_sin = s/(qnorm*dnorm)
-                results[i]['rank_points'] = cos_sin
-            results = sorted(results, key=lambda x: x['rank_points'], reverse=True)
-            results.append({})
-
-            return results[:top_n]
-
-        return []
-
-    def _run_query_cos(self, query, top_n=-1):
-        """
-            Cosine similarity algorithm for ranking query search
+            Match score(altered) algorithm for ranking query search
         """
         tokens = [self._stemmer.stem(self._lemmatizer.lemmatize(i))
                   for i in self._qtokenizer.tokenize(query) if len(i) > 0]
 
         poss = set()
         token_df = {}
-        for token in tqdm(tokens, bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
+        for i_token, token in tqdm(enumerate(tokens), total=len(tokens), bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
                           desc="Searching for tokens from query in the Tire "):
             new_poss = self.search(token, mapped=False, lemstem=False)
-            if not new_poss:
+            if not new_poss and not ("*" in token or "?" in token):
                 _possible_token = self._posible_token_match(token)
+                logger("No possible matching found in docs for word: " + token)
+                replace_token = ""
+
                 if _possible_token:
+                    replace_token = _possible_token
+                    logger("Triyng " + _possible_token + " instead of " + token)
                     new_poss = self.search(_possible_token, mapped=False, lemstem=False)
+                j_token = i_token + 1
+                
+                while j_token < len(tokens):
+                    if tokens[j_token] == token:
+                        tokens[j_token] = replace_token
+                tokens[i_token] = replace_token
             tmp_poss = set(new_poss)
             if "*" in token or "?" in token:
                 token_df[token] = [{i:new_poss.count(i) for i in tmp_poss}, len(new_poss)]
+            
             poss.update(tmp_poss)
 
         if poss:
@@ -316,30 +270,37 @@ class InvertedIndex(object):
                               bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
                               desc="Getting required row from csv files and "
                                     "calculating cosine similarity"):
-                csv = read_csv(self._paths[int(i_doc)])
-
+                if show_detail:
+                    csv = read_csv(self._paths[int(i_doc)])
+                
                 for i_row, doc in res[i_doc]:
                     r = {}
                     r['Path'] = self._paths[int(i_doc)]
                     r['Row_no'] = i_row
 
-                    for col in csv.columns:
-                        r[col] = csv[col][i_row]
+                    n_counter = 0
+
+                    if show_detail:
+                        for col in csv.columns:
+                            r[col] = csv[col][i_row]
                     dtf_idf_vector, dnorm, n_tokens = self._tf_idf_v[doc]
                     dotp_sum = 0
 
                     for j in qtf_idf_vector:
                         if j in dtf_idf_vector.keys():
                             dotp_sum += dtf_idf_vector[j]*qtf_idf_vector[j]
-                        elif  "*" in j or "?" in j :
-                            tf_idf = (token_df[j][0][doc]/n_tokens)*((len(self._vocab)+1)/(token_df[j][1]+1))
-                            dotp_sum += qtf_idf_vector[j]*tf_idf
-                            dnorm = sqrt(dnorm**2 + tf_idf**2)
+                            n_counter += 1
+                        elif  "*" in j or "?" in j:
+                            if doc in token_df[j][0].keys():
+                                tf_idf = (token_df[j][0][doc]/n_tokens)*((len(self._vocab)+1)/(token_df[j][1]+1))
+                                dotp_sum += qtf_idf_vector[j]*tf_idf
+                                dnorm = sqrt(dnorm**2 + tf_idf**2)
+                                n_counter += 1
                     
                     cos_sin = 0
                     if qnorm != 0:
                         cos_sin = dotp_sum/(qnorm*dnorm)
-                    r['rank_points'] = cos_sin
+                    r['rank_points'] = cos_sin*(n_counter/len(qtf_idf_vector))
                     results.append(r)
 
             results = sorted(results, key=lambda x: x['rank_points'], reverse=True)
@@ -349,27 +310,128 @@ class InvertedIndex(object):
 
         return []
 
-    def run_query(self, query, ranking=False, top_n=-1, ranking_algo=None):
+    def _run_query_match(self, query, top_n=-1, show_detail=True):
+        """
+            Cosine similarity algorithm for ranking query search
+        """
+        tokens = [self._stemmer.stem(self._lemmatizer.lemmatize(i))
+                  for i in self._qtokenizer.tokenize(query) if len(i) > 0]
+
+        poss = set()
+        token_df = {}
+        for i_token, token in tqdm(enumerate(tokens), total=len(tokens), bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
+                          desc="Searching for tokens from query in the Tire "):
+            new_poss = self.search(token, mapped=False, lemstem=False)
+            if not new_poss and not ("*" in token or "?" in token):
+                _possible_token = self._posible_token_match(token)
+                logger("No possible matching found in docs for word: " + token)
+                replace_token = ""
+
+                if _possible_token:
+                    replace_token = _possible_token
+                    logger("Triyng " + _possible_token + " instead of " + token)
+                    new_poss = self.search(_possible_token, mapped=False, lemstem=False)
+                j_token = i_token + 1
+                
+                while j_token < len(tokens):
+                    if tokens[j_token] == token:
+                        tokens[j_token] = replace_token
+                tokens[i_token] = replace_token
+            tmp_poss = set(new_poss)
+            if "*" in token or "?" in token:
+                token_df[token] = [{i:new_poss.count(i) for i in tmp_poss}, len(new_poss)]
+            
+            poss.update(tmp_poss)
+
+        if poss:
+            res = {}
+            for pos in tqdm(poss, smoothing=0.7, bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
+                            desc="Mapping hashed doc to doc_is:[rows] "):
+                doc_row = self._post2doc_mapper[pos]
+
+                if doc_row[0] in res.keys():
+                    res[doc_row[0]].append([doc_row[1], pos])
+                else:
+                    res[doc_row[0]] = [[doc_row[1], pos]]
+
+            results = []
+            qtf_idf_vector, _ = self.get_tfidf_vector(tokens, token_df=token_df)
+
+            for i_doc in tqdm(res.keys(), smoothing=0.7,
+                              bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
+                              desc="Getting required row from csv files and "
+                                    "calculating match score"):
+                if show_detail:
+                    csv = read_csv(self._paths[int(i_doc)])
+
+                for i_row, doc in res[i_doc]:
+                    r = {}
+                    r['Path'] = self._paths[int(i_doc)]
+                    r['Row_no'] = i_row
+                    
+                    if show_detail:
+                        for col in csv.columns:
+                            r[col] = csv[col][i_row]
+
+                    dtf_idf_vector, _, n_tokens = self._tf_idf_v[doc]
+                    match_isum = 0
+                    n_counter = 0
+                    for j in qtf_idf_vector:
+                        if j in dtf_idf_vector.keys():
+                            match_isum += (dtf_idf_vector[j])
+                            n_counter += 1
+                        elif "*" in j or "?" in j:
+                            if doc in token_df[j][0].keys():
+                                tf_idf = (token_df[j][0][doc]/n_tokens)*((len(self._vocab)+1)/(token_df[j][1]+1))
+                                match_isum += tf_idf
+                                n_counter += 1
+                    
+                    r['rank_points'] = 0
+                    if match_isum:
+                        r['rank_points'] = match_isum*n_counter/100000
+                    results.append(r)
+
+            results = sorted(results, key=lambda x: x['rank_points'], reverse=True)
+            results.append({})
+
+            return results[:top_n]
+
+        return []
+
+    def run_query(self, query, ranking=False, top_n=-1, ranking_algo=None, show_detail=True):
         """
             Calls algo based query search anf ranking if specified or
             returns normal query search
         """
         if ranking:
             if ranking_algo == 'cos':
-                return self._run_query_cos(query, top_n=top_n)
+                return self._run_query_cos(query, top_n=top_n, show_detail=show_detail)
+            elif ranking_algo == 'match':
+                return self._run_query_match(query, top_n=top_n, show_detail=show_detail)
         tokens = [self._stemmer.stem(self._lemmatizer.lemmatize(i))
                   for i in self._qtokenizer.tokenize(query) if len(i) > 0]
 
         poss = set()
 
-        for token in tqdm(tokens, bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
-                          desc="Searching for tokens from query in the Tire "):
+        for i_token, token in tqdm(enumerate(tokens), bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
+                                   desc="Searching for tokens from query in the Tire "):
             new_poss = self.search(token, mapped=False, lemstem=False)
             if not new_poss:
                 _possible_token = self._posible_token_match(token)
-                print(_possible_token)
+                logger("No possible matching found in docs for word: " + token)
+                replace_token = ""
+
                 if _possible_token:
+                    replace_token = _possible_token
+                    logger("Triyng " + _possible_token + " instead of " + token)
                     new_poss = self.search(_possible_token, mapped=False, lemstem=False)
+                j_token = i_token + 1
+
+                while j_token < len(tokens):
+                    if tokens[j_token] == token:
+                        tokens[j_token] = replace_token
+                tokens[i_token] = replace_token
+
             poss.update(new_poss)
 
         if poss:
@@ -387,13 +449,15 @@ class InvertedIndex(object):
             for i_doc in tqdm(res.keys(), smoothing=0.7,
                               bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
                               desc="Getting required row from csv files "):
-                csv = read_csv(self._paths[int(i_doc)])
+                if show_detail:
+                    csv = read_csv(self._paths[int(i_doc)])
                 for i_row in res[i_doc]:
                     r = {}
                     r['Path'] = self._paths[int(i_doc)]
                     r['Row_no'] = i_row
-                    for col in csv.columns:
-                        r[col] = csv[col][i_row]
+                    if show_detail:
+                        for col in csv.columns:
+                            r[col] = csv[col][i_row]
                     results.append(r)
 
             return results[:top_n]
@@ -432,7 +496,7 @@ class InvertedIndex(object):
         """
             Load data from saved posting list and hashed row-doc_id mapper
         """
-        bar = tqdm(total=4, smoothing=0.7, bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
+        bar = tqdm(total=5, smoothing=0.7, bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
                    desc="Loading engine model ")
         file_reader = open(filepath+"posting_list.json", 'r')
         self._trie.from_dict(loads(file_reader.read()))
