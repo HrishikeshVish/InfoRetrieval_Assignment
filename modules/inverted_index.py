@@ -210,9 +210,8 @@ class InvertedIndex(object):
         res = []
         for word in possible_words:
             if possible_words[word] > len(word)/2:
-                max_len = max(len(word), len(token))
-                sv_1 = string_vector(word, max_len)
-                sv_2 = string_vector(token, max_len)
+                sv_1 = string_vector(word)
+                sv_2 = string_vector(token)
                 res.append((word, cosine_sim(sv_1, sv_2)*possible_words[word]))
         res = sorted(res, key=lambda x: x[1], reverse=True)
         if res:

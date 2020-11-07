@@ -3,10 +3,13 @@ from numpy import dot, linalg, array, zeros
 
 
 
-def string_vector(string, n):
-    s_v = zeros(n)
+def string_vector(string):
+    s_v = zeros(26)
     for i,j in enumerate(string):
-        s_v[i] = ord(j)
+        try:
+            s_v[ord(j)-ord('a')] += 1
+        except Exception as exe:
+            pass
     return s_v
 
 
