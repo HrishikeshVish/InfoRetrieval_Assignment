@@ -48,11 +48,11 @@ Go to config.py in config directory.
 
 ### Problem Statement
 #### Problem:
- - a) Build a search engine for Environmental News NLP archieve.
- - b) Built a corpus for archieve with atleast 418 documents.
+ - Build a search engine for Environmental News NLP archieve.
+ - Built a corpus for archieve with atleast 418 documents.
 
 #### Data:
- a) Use the following link for Environmental News NLP dataset. https://www.kaggle.com/amritvirsinghx/environmental-news-nlp-dataset
+ - Use the following link for Environmental News NLP dataset. https://www.kaggle.com/amritvirsinghx/environmental-news-nlp-dataset
 
 ### Deliverables: 
 Your Code should contain functionality to 
