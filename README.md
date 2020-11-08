@@ -41,10 +41,6 @@ Go to config.py in config directory.
  - SHOW_DETAIL = Boolean (True or False), specifies if you want to extract data from csv and show along with the result
  - RANKING_ALGO = Specifies type of ranking algorithm you want to adopt. Options = "cos", "match"
  - TOTAL_N_RESULT = Number of top results to be displayed
- - SHOW_PROGRESS_BAR = Boolean (True or False), To show the progress bar
- - SCORE_THRESHOLD = default:1e-4, score below this will not be displayed or returned
- - REMOVE_STOP_WORDS = Boolean (True or False), If you want to remove specified stopwords
- - STOP_WORDS = set of tokens which won't we considered for indexing or for running query if REMOVE_STOP_WORDS is true
 
 ### Problem Statement
 #### Problem:
