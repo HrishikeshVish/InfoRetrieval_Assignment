@@ -1,6 +1,0 @@
-{
-    "python.pythonPath": "/root/Software/anaconda3/bin/python",
-    "python.formatting.blackArgs": [
-        "--line-length 79"
-    ]
-}

@@ -1,50 +1,69 @@
+"""
+    Main method for search engine
+"""
+
 from os import listdir
-from modules import Trie
-from modules.TrieDS import merge
 from modules import InvertedIndex
-from pandas import read_csv
+from config import DATA_PATH, REQUIRED_FILE_FOR_ENGINE, ENGINE_PATH
+from config import RANKING_ALGO, SHOW_DETAIL, TOTAL_N_RESULT, RANKING
+from utils import logger
 import sys
 
-_data_path = "/root/Documents/Project/archive/TelevisionNews/"
 
-
-
-def pos_in_csv(pos):
-    """
-    """
-    paths = sorted([_data_path+i for i in listdir(_data_path)])
-    for i_doc in pos.keys():
-        print(paths[int(i_doc)-1], "\n\n")
-        csv = read_csv(paths[int(i_doc)])
-        for i_row in pos[i_doc]:
-            for col in csv.columns:
-                print("\t", col, " : ", csv[col][i_row])
-            print("\n\n")
-        print("\n\n")
-
-
-
+_IS_ENGINE = True
 
 if __name__ == "__main__":
     """
+        Main function that run search engine
     """
-    search_term = "un*ed"
-    if len(sys.argv) == 2:
-        search_term = sys.argv[1]
+    paths = sorted([DATA_PATH+i for i in listdir(DATA_PATH)])
+    engine = InvertedIndex(paths)
+    for file_i in REQUIRED_FILE_FOR_ENGINE:
+        if file_i not in listdir(ENGINE_PATH):
+            _IS_ENGINE = False
+            engine.initialize()
+            engine.save(ENGINE_PATH)
+            break
 
-    engine = InvertedIndex()
-    if not ("posting_list.json" in listdir("engine/") and "pos2doc.json" in listdir("engine/")):
-        paths = sorted([_data_path+i for i in listdir(_data_path)])
-
-        for i_path in range(len(paths)):
-            engine.from_csv(paths[i_path], i_path)
-        engine.save("engine/")
-
-    else:
+    if _IS_ENGINE:
         engine.load("engine/")
 
-    ans = engine.search(search_term)
-    print("START")
-    pos_in_csv(ans)
-    print("END")
-    
+    while 1:
+        try:
+            query = input("[Note: Press Ctrl+C to abort]\nEnter Search Query : ")
+        except Exception as exe:
+            logger(exe)
+            exit(0)
+        ans = engine.run_query(query,
+                              ranking=RANKING,
+                              ranking_algo=RANKING_ALGO,
+                              top_n=TOTAL_N_RESULT,
+                              show_detail=SHOW_DETAIL)
+        if ans:
+            print("\n\nPrinting relevant results\n\n")
+        for i in ans:
+            try:
+                print('Path : ', i['Path'])
+            except Exception as exe:
+                logger(exe)
+                continue
+            print('Row_no : ', i['Row_no'])
+            try:
+                print('rank_points : ', i['rank_points'])
+            except Exception as exe:
+                logger(exe)
+            for j in i.keys():
+                if j != 'Path' and j != 'Row_no' and j != 'rank_points':
+                    print(j, ":", i[j])
+            print("\n\n")
+
+        _y_n = input("Want to continue?[y/N]")
+        if not _y_n:
+            break
+        if _y_n.lower() == "n":
+            break
+        if _y_n.lower() == "y":
+            sys.stderr.write("\x1b[2J\x1b[H")
+            continue
+        print("wrong input")
+        sys.exit(1)
