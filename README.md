@@ -8,11 +8,44 @@
 
 ## Trie based inverted index
 
+
+### Install Requirements
+
+```bash
+pip3 install -r requirements.txt
+```
+
+
+### Download required nltk data
+
+```bash
+python3 initialize.py
+```
+
 ### How to use search engine
 
 ```bash
-python3 main.py <search_term>
+python3 main.py
 ```
+
+
+### How to change search query parameter
+
+Go to config.py in config directory.
+
+#### Changeable configs:
+ - DATA_PATH = Path to csv files
+ - ENGINE_PATH = Path were data required by engine is stored
+ - LOG_FILE = Path where log file is stored
+ - RANKING = Boolean (True or False), specifies if you want to rank the output or not
+ - SHOW_DETAIL = Boolean (True or False), specifies if you want to extract data from csv and show along with the result
+ - RANKING_ALGO = Specifies type of ranking algorithm you want to adopt. Options = "cos", "match"
+ - TOTAL_N_RESULT = Number of top results to be displayed
+ - SHOW_PROGRESS_BAR = Boolean (True or False), To show the progress bar
+ - SCORE_THRESHOLD = default:1e-4, score below this will not be displayed or returned
+ - REMOVE_STOP_WORDS = Boolean (True or False), If you want to remove specified stopwords
+ - STOP_WORDS = set of tokens which won't we considered for indexing or for running query if REMOVE_STOP_WORDS is true
+
 ### Problem Statement
 #### Problem:
  - a) Build a search engine for Environmental News NLP archieve.

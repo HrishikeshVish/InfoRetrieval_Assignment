@@ -1,3 +1,6 @@
+"""
+    Trie Data Structur is defined here
+"""
 from copy import deepcopy
 
 
@@ -60,15 +63,15 @@ def _dict_merge(a, b):
 class Trie:
     """
         Trie data structure for Inverted Index
-        
+
         Structure(Ex):
             'abs', 'abc', 'bbc'
-            Trie('abs', 'abc', 'bbc') -> {'a':[Trie('bs', 'bc'),[0,1]], 
+            Trie('abs', 'abc', 'bbc') -> {'a':[Trie('bs', 'bc'),[0,1]],
                                             'b': [Trie('bc'), [2]]]}
 
             Trie('bs', 'bc') - > {'b': [Trie('s', 'c'), [0,1]]}
             Trie('bc') -> {'b': [Trie('c'), [2]]}
-            Trie('s', 'c') -> {'s': [Trie(), [0]], 
+            Trie('s', 'c') -> {'s': [Trie(), [0]],
                                 'c' : [Trie(), [1]]}
             Trie('c') -> {'c': [Trie(), [2]]}
 
@@ -77,7 +80,7 @@ class Trie:
             tokens = ['abs', 'abc', 'bbc']
             for i_token in range(len(tokens)):
                 trie.add_string(token, i_token)     #i_token is taken as doc_id
-            
+
             # For search :
             pos = trie.search('abs')
     """
@@ -91,15 +94,15 @@ class Trie:
     @staticmethod
     def __is_valid_dn(dn):
         """
-           Check validity of data-node 
+           Check validity of data-node
         """
-        if type(dn) != dict:
+        if not isinstance(dn, dict):
             return False
 
         for i in dn.keys():
-            if type(i) != str:
+            if not isinstance(i, str):
                 return False
-            if type(dn[i][0]) != Trie:
+            if not isinstance(dn[i][0], Trie):
                 return False
         return True
 
@@ -111,14 +114,14 @@ class Trie:
         return self.__data_node.copy()
 
     @data_node.setter
-    def data_node(self, dn):
+    def data_node(self, d_n):
         """
             Setter for data_node
         """
-        if self.__is_valid_dn(dn):
-            self.__data_node = dn
+        if self.__is_valid_dn(d_n):
+            self.__data_node = d_n
         else:
-            raise InvalidDataNodeStructure(dn)
+            raise InvalidDataNodeStructure(d_n)
 
     def add_string(self, string, doc):
         """
@@ -141,26 +144,32 @@ class Trie:
         """
             searching self(Trie) to check presence of 'string'
 
-            input can be wild-card such as string='un*ed' or 
+            input can be wild-card such as string='un*ed' or
                 normal string such as string = "united"
         """
         if len(string) < 1:
             raise IrregularStringLength(string)
 
         _first_char = string[0]
-        # print(string)
         if len(string) == 1:
             if _first_char in self.__data_node.keys():
-                pos = deepcopy(self.__data_node[_first_char][1])
-                tmp = self.__data_node[_first_char][0].__data_node
+                pos = self.__data_node[_first_char][1]
+                res = []
+                tmp = self.__data_node[_first_char][0].data_node
+                tmp2 = set()
+                for i in tmp.keys():
+                    tmp2.update(set(tmp[i][1]))
                 for i in pos:
-                    for j in tmp.keys():
-                        if i in tmp[j][1]:
-                            pos.remove(i)
-                return pos
+                    if i not in tmp2:
+                        res.append(i)
+                return res
+            if _first_char == '?':
+                res = []
+                for i in self.__data_node.keys():
+                    res = list(set(res+self.search(i)))
+                return deepcopy(res)
             if _first_char == '*':
                 res = []
-                # print("lol")
                 for i in self.__data_node.keys():
                     res = list(set(res+self.__data_node[i][1]))
                 return deepcopy(res)
@@ -168,6 +177,11 @@ class Trie:
             if _first_char in self.__data_node.keys():
                 return deepcopy(self.__data_node[_first_char][1])
         else:
+            if _first_char == '?':
+                res = []
+                for i in self.__data_node.keys():
+                    res = list(set(res+self.__data_node[i][0].search(string[1:])))
+                return deepcopy(res)
             if _first_char == '*':
                 res = self.search(string[1:])
                 for i in self.__data_node.keys():
@@ -181,15 +195,14 @@ class Trie:
         """
             class method to merge two tries
         """
-        assert(type(trie) == Trie)
-        dn = trie.data_node
-        for i in dn.keys():
+        _dn = trie.data_node
+        for i in _dn.keys():
             if i in self.__data_node.keys():
                 self.__data_node[i][1] = list(
-                    set(self.__data_node[i][1] + dn[i][1]))
-                self.__data_node[i][0].merge(dn[i][0])
+                    set(self.__data_node[i][1] + _dn[i][1]))
+                self.__data_node[i][0].merge(_dn[i][0])
             else:
-                self.__data_node[i] = deepcopy(dn[i])
+                self.__data_node[i] = deepcopy(_dn[i])
 
     def to_dict(self):
         """
@@ -217,13 +230,10 @@ class Trie:
             self.__data_node[i] = [new_trie, [int(jj) for jj in trie_dict[i][1]]]
 
 
-
-
 def merge(a, b):
     """
         Merge two trie
     """
-    assert(type(a) == Trie and type(b) == Trie)
     dn_1 = a.data_node
     dn_2 = b.data_node
     dn_3 = {}
