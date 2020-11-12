@@ -21,7 +21,7 @@ def CSV2JSON(csvFile):
     return data
           
 # change this
-path = './TelevisionNews/'
+path = '../TelevisionNews/'
 paths = sorted([path+i for i in os.listdir(path)])
 es = Elasticsearch([{'Host':'localhost','port':9200}])
 r = requests.get('http://127.0.0.1:9200')
@@ -34,6 +34,7 @@ for file_i in paths:
     with open(file_i) as f:
         reader = csv.DictReader(f)
 	# if this not work use es.index()
+        # es.index(index='my-index', doc_type='my-type', id=i, body=JSONthing)
         helpers.bulk(es, reader, index='my-index', doc_type='my-type')
     i += 1
 
