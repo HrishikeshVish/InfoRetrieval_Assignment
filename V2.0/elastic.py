@@ -46,7 +46,7 @@ def elasticSearch(query):
     now = time.time()
     out = []
     for item in query:
-        a = es.search(index="my-index", size = 10000, body={'size':10, 'query':{"match":{"Snippet":{"query":item, "fuzziness":"AUTO","auto_generate_synonyms_phrase_query" : "false"}}}})
+        a = es.search(index="my-index", size = 100, body={'size':10, 'query':{"match":{"Snippet":{"query":item, "fuzziness":"AUTO","auto_generate_synonyms_phrase_query" : "false"}}}})
         item1 = a['hits']['hits']
         for hit in a['hits']['hits']:
             snippet = hit['_source']['Snippet']
