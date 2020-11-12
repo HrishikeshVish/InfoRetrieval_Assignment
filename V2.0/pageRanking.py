@@ -63,11 +63,13 @@ def buildQueryVector(query, documents):
 def cosineSimilarity(v1, v2):
     return np.dot(v1,v2)/float(LA.norm(v1)*LA.norm(v2))
 
-def computeRelevance(query, documents, tf_idf_matrix, query_vector):
+def computeRelevance(query, documents, files, tf_idf_matrix, query_vector):
     ranked_docs = []
+    j = 0
     for i, doc in enumerate(documents):
         similarity = cosineSimilarity(tf_idf_matrix[:,i].reshape(1, len(tf_idf_matrix)), query_vector)
-        ranked_docs.append([doc, float(similarity[0])])
+        ranked_docs.append([doc, float(similarity[0]), files[j]])
+        j = j + 1
         #print("query document {}, similarity {}".format(i, float(similarity[0])))
     return ranked_docs
 
@@ -89,8 +91,10 @@ def rankByFreq(document_list):
 
 def rankByTFIDF(ranked_order_of_docs, num_docs, query):
     text = []
+    files = []
     for document in ranked_order_of_docs:
         file,offset = document[1].split(" ")
+        files.append(document[1])
         offset = int(offset)
         corpus = pd.read_csv('./TelevisionNews/'+file)
         snippet = corpus['Snippet'][offset]
@@ -102,9 +106,11 @@ def rankByTFIDF(ranked_order_of_docs, num_docs, query):
     #tf_idf = tfidf_transformer.fit_transform(X_train_counts)
     tf_idf_matrix = generateVectors(query, text)
     query_vector = buildQueryVector(query, text)
-    ranked_docs = computeRelevance(query, text, tf_idf_matrix, query_vector)
+    
+    ranked_docs = computeRelevance(query, text, files, tf_idf_matrix, query_vector)
     ranked_docs = sorted(ranked_docs, key=lambda x:x[1], reverse=True)
-    for i in range(num_docs):
-        print(ranked_docs[i][0])
-        print("Similarity = ", ranked_docs[i][1])
+    #for i in range(num_docs):
+        #print(ranked_docs[i][0])
+        #print("Similarity = ", ranked_docs[i][1])
+    return ranked_docs
         
