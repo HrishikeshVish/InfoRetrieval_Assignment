@@ -44,7 +44,7 @@ def search(query):
     for query_term in term_tokenizer.tokenize(query.lower()):
         # If query term is a wildcard query
         if "*" in query_term or "?" in query_term:
-            document_list = getWildCardMatches(query_term, permuterm_index, document_list)
+            document_list = getWildCardMatches(query_term, permuterm_index, document_list, wildcard_tokenizer, posting_list)
             
         # If query term is a normal query
         else:

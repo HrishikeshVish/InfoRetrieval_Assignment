@@ -36,7 +36,13 @@ def elasticSearch(query):
             reader = csv.DictReader(f)
             #es.index(index='my-index', id=i, body=CSV2JSON(file_i))
             # if this not work use es.index()
-            helpers.bulk(es, reader, index='my-index', doc_type='my-type')
+            #print(reader['Snippet'])
+            
+            
+            helpers.bulk(es, "str", index='my-index', doc_type='my-type')
+            
+                
+            
             #print(i)
     
         i += 1
@@ -46,7 +52,7 @@ def elasticSearch(query):
     now = time.time()
     out = []
     for item in query:
-        a = es.search(index="my-index", size = 100, body={'size':10, 'query':{"match":{"Snippet":{"query":item, "fuzziness":"AUTO","auto_generate_synonyms_phrase_query" : "false"}}}})
+        a = es.search(index="my-index", size = 10000, body={'size':10, 'query':{"match":{"Snippet":{"query":item, "fuzziness":"AUTO","auto_generate_synonyms_phrase_query" : "false"}}}})
         item1 = a['hits']['hits']
         for hit in a['hits']['hits']:
             snippet = hit['_source']['Snippet']

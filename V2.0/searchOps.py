@@ -51,7 +51,7 @@ def minimumEditDistance(s1, s2):
 
 
 
-def getWildCardMatches(query_term, permuterm_index, document_list):
+def getWildCardMatches(query_term, permuterm_index, document_list, wildcard_tokenizer, posting_list):
     # Get all the segments of the wildcard query term
     wildcard_segments = wildcard_tokenizer.tokenize(query_term)
     # Get all the terms that have the wildcard segment as a substring

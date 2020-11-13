@@ -1,4 +1,4 @@
-from elastic import elasticSearch
+#from elastic import elasticSearch
 from search import search
 import json
 import pandas as pd
@@ -6,6 +6,7 @@ from pageRanking import rankByFreq, rankByTFIDF
 with open('test.json') as f:
     data = json.load(f)
 
+"""
 out = elasticSearch(data)
 
 elasticURLS = []
@@ -21,15 +22,20 @@ for item in out:
     counter+=1
     elasticURLS.append(elems)
 #print(elasticURLS)
-
+"""
 normsearchURLS = []
 counter = 0
 for ele in data:
     document_list = search(ele)
     print("HERE1")
     ranked_order_of_docs = rankByFreq(document_list)
+    
+    
     print("HERE2")
-    ranked_docs = rankByTFIDF(ranked_order_of_docs, 5, ele)
+    if(len(ranked_order_of_docs)>1000):
+        ranked_docs = rankByTFIDF(ranked_order_of_docs[0:1000], 5, ele)
+    else:
+        ranked_docs = rankByTFIDF(ranked_order_of_docs, 5, ele)
     fin_out = []
     print("HERE")
     for i in range(15):
@@ -42,6 +48,7 @@ for ele in data:
     with open("./Actual/"+str(counter)+".json", "w") as outfile:
         json.dump(fin_out, outfile)
     normsearchURLS.append(fin_out)
+    counter+=1
 #print(normsearchURLS)
         
 
