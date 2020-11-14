@@ -1,45 +1,50 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Nov 14 12:20:21 2020
+
+@author: 91948
+"""
+from elasticsearch import Elasticsearch,helpers
+from tqdm import tqdm
 import requests
-from elasticsearch import Elasticsearch
+import time
 import json
 import csv
-import sys
 import os
-from tqdm import tqdm
-from elasticsearch import helpers, Elasticsearch
-import csv
 
-es = Elasticsearch()
+# change if data already indexed
+index = True
+res = requests.get("http://127.0.0.1:9200")
+if res.status_code !=200:
+    print("Shit")
+    
+    
+path = './TelevisionNews/'
+paths = sorted(list(map(lambda x:path+x,os.listdir(path))))
+es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
 
+if index:
+    for file in tqdm(paths):
+        try:
+            with open(file) as f:
+                reader = csv.DictReader(f)
+                for rows in reader:
+                     es.index(index='test',body=rows)   
+        except:
+            pass
 
-def CSV2JSON(csvFile): 
-    data = dict()
-    with open(csvFile, encoding='utf-8') as csvf: 
-        csvReader = csv.DictReader(csvf)
-        for rows in csvReader: 
-            key = rows['\ufeffURL'] 
-            data[key] = rows 
-    return data
-          
-# change this
-path = '../TelevisionNews/'
-paths = sorted([path+i for i in os.listdir(path)])
-es = Elasticsearch([{'Host':'localhost','port':9200}])
-r = requests.get('http://127.0.0.1:9200')
-# if 200 all is good
-print(r.status_code)
-# index all the data points
-i = 0
-for file_i in paths:
-    # es.index(index=str(i), body=CSV2JSON(file_i))
-    with open(file_i) as f:
-        reader = csv.DictReader(f)
-	# if this not work use es.index()
-        # es.index(index='my-index', doc_type='my-type', id=i, body=JSONthing)
-        helpers.bulk(es, reader, index='my-index', doc_type='my-type')
-    i += 1
+# test the queries
+with open('queries.txt') as f:
+    queries = json.loads(f.read().strip(''))
 
-## Do this multiple times on dat json file
-import time
-now = time.time()
-a = es.search(index="my-index", body={'query':{"match": {"Snippet":"germany suffers"}}})
-print("Time for search:",time.time() - now)
+data = dict()
+for query in queries:
+    data[query] =dict()
+    start = time.time()
+    response = es.search(index="test", body={"query": {"match": {'Snippet':query}}})
+    data[query]['time'] = time.time() - start
+    data[query]['result'] = response['hits']['hits'][:3] #change this if needed
+    
+# generate GT    
+with open('groudTruth.txt', 'w') as outfile:
+    json.dump(data, outfile)
