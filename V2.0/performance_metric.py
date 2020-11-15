@@ -1,54 +1,66 @@
-#from elastic import elasticSearch
+
 from search import search
 import json
 import pandas as pd
 from pageRanking import rankByFreq, rankByTFIDF
-with open('test.json') as f:
+
+with open('expectedList1.json') as f:
     data = json.load(f)
+expected = data
+queries = list(data.keys())
 
-"""
-out = elasticSearch(data)
-
-elasticURLS = []
-counter = 0
-for item in out:
-    elems = []
-    output = item['hits']['hits']
-    for x in output:
-        
-        elems.append(x['_source']['\ufeffURL'])
-    with open("./Expected/"+str(counter)+".json", "w") as outfile:
-        json.dump(elems, outfile)
-    counter+=1
-    elasticURLS.append(elems)
-#print(elasticURLS)
-"""
 normsearchURLS = []
 counter = 0
-for ele in data:
+actualOutput = {}
+count = 0
+for ele in queries:
+    if(count == 4):
+        count+=1
+        continue
+    count+=1
     document_list = search(ele)
-    print("HERE1")
+    
     ranked_order_of_docs = rankByFreq(document_list)
+    actualOutput[ele] = []
     
     
-    print("HERE2")
     if(len(ranked_order_of_docs)>1000):
-        ranked_docs = rankByTFIDF(ranked_order_of_docs[0:1000], 5, ele)
+        ranked_docs = rankByTFIDF(ranked_order_of_docs, 5, ele)
     else:
         ranked_docs = rankByTFIDF(ranked_order_of_docs, 5, ele)
     fin_out = []
-    print("HERE")
-    for i in range(15):
+    size = len(ranked_docs)
+    if(size>10):
+        size = 10
+        
+    for i in range(size):
         file, offset = ranked_docs[i][2].split(" ")
         corpus = pd.read_csv('./TelevisionNews/'+file)
         offset = int(offset)
         snippet = corpus['Snippet'][offset]
         url = corpus['URL'][offset]
         fin_out.append(url)
+        actualOutput[ele].append(url)
     with open("./Actual/"+str(counter)+".json", "w") as outfile:
         json.dump(fin_out, outfile)
     normsearchURLS.append(fin_out)
     counter+=1
-#print(normsearchURLS)
-        
+with open("actualList.json", "w") as out:
+    json.dump(actualOutput, out)
+print(actualOutput)
+
+actual = {}
+for i in range(10):
+    with open("./Actual/"+str(i)+".json") as f:
+        data = json.load(f)
+        actual[queries[i]] = data
+#print(actual)
+print(actual.keys())
+
+for i in list(actual.keys()):
+    
+    #print(len(actual[i]))
+    #print(len(expected[i]))
+    print(len(list(set(actual[i]) & set(expected[i]))))
+    
 

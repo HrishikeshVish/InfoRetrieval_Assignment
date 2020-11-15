@@ -83,7 +83,7 @@ def getWildCardMatches(query_term, permuterm_index, document_list, wildcard_toke
         document_list.extend(posting_list[snl_word])
     return document_list
     
-def getNormalMatches(stemmer, lemmatizer, query_term, document_list, posting_list):
+def getNormalMatches(stemmer, lemmatizer, query_term, document_list, posting_list, bigram_index):
     snl_query_term = stemmer.stem(lemmatizer.lemmatize(query_term))
     # If the query term exists in the vocabulary
     if snl_query_term in posting_list.keys():

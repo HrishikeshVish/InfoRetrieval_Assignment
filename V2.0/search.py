@@ -48,7 +48,7 @@ def search(query):
             
         # If query term is a normal query
         else:
-            document_list = getNormalMatches(stemmer, lemmatizer, query_term, document_list, posting_list)
+            document_list = getNormalMatches(stemmer, lemmatizer, query_term, document_list, posting_list, bigram_index)
             
             
     
