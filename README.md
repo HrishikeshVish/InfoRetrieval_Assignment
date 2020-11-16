@@ -23,6 +23,8 @@ python3 main.py
 
 ### To compare Elastic ansd Trie Search Engine
 
+**Make sure SHOW_DETAIL is set to True in config file before running this**
+
 Open two terminals
  - ```bash
     docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.10.0
@@ -32,6 +34,8 @@ Open two terminals
     ```
 
 ### To benchmark the Trie Search Engine
+
+**Make sure SHOW_DETAIL is set to True in config file before running this**
 
 Open two terminals
  - ```bash
