@@ -64,7 +64,6 @@ if __name__ == "__main__":
         # Metrics Calculation
         metrics = {}
         metrics['tp'] = len(list(set(actual) & set(expected)))
-        print(metrics['tp'])
         metrics['fp'] = len(list(set(actual).difference(set(expected))))
         metrics['tn'] = totalSize - len(list(set(actual).union(set(expected))))
         metrics['fn'] = len(list(set(expected).difference(set(actual))))

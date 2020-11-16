@@ -63,7 +63,6 @@ if __name__ == "__main__":
         metrics = {}
         try:
             metrics['tp'] = len(list(set(actual) & set(expected)))
-            print(metrics['tp'])
             metrics['fp'] = len(list(set(actual).difference(set(expected))))
             metrics['tn'] = totalSize - len(list(set(actual).union(set(expected))))
             metrics['fn'] = len(list(set(expected).difference(set(actual))))
@@ -80,8 +79,8 @@ if __name__ == "__main__":
                 metrics['f1'] = 0
         except:
             pass
-
-        print(metrics)
+        
+        print("\n\nScore : \n", metrics)
 
         _y_n = input("Want to continue?[y/N]")
         if not _y_n:
