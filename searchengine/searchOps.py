@@ -49,8 +49,6 @@ def minimumEditDistance(s1, s2):
                 dp[i][j] = 1 + min(dp[i][j-1], dp[i-1][j], dp[i-1][j-1])
     return dp[m][n]
 
-
-
 def getWildCardMatches(query_term, permuterm_index, document_list, wildcard_tokenizer, posting_list):
     # Get all the segments of the wildcard query term
     wildcard_segments = wildcard_tokenizer.tokenize(query_term)
