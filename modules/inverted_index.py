@@ -16,6 +16,9 @@ from config import SHOW_PROGRESS_BAR, SCORE_THRESHOLD, REMOVE_STOP_WORDS, STOP_W
 from .TrieDS import Trie
 
 def _minimum_edit_distance(s1, s2):
+    """
+        DP algorithm for minimum edit distance
+    """
     if len(s1) == 0:
         return len(s2)
     if len(s2) == 0:
@@ -232,6 +235,7 @@ class InvertedIndex(object):
 
     def _posible_token_match(self, token):
         """
+            Spelling correction algorithm
         """
         _bigrams = ["".join(i) for i in bigrams(token)]
         possible_words = {}

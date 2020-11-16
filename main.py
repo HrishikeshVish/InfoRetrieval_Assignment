@@ -18,6 +18,7 @@ if __name__ == "__main__":
     """
         Main function that run search engine
     """
+    # Check if engine is already saved else create and save
     paths = sorted([DATA_PATH+i for i in listdir(DATA_PATH)])
     engine = InvertedIndex(paths)
     for file_i in REQUIRED_FILE_FOR_ENGINE:

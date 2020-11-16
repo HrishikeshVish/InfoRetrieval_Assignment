@@ -20,6 +20,7 @@ if __name__ == "__main__":
     """
         Main function that run search engine
     """
+    # Check if engine is already saved else create and save
     paths = sorted([DATA_PATH+i for i in listdir(DATA_PATH)])
     engine = InvertedIndex(paths)
     es = Elasticsearch([{'Host':'localhost','port':9200}])
@@ -39,8 +40,12 @@ if __name__ == "__main__":
             logger(exe)
             exit(0)
         
+        # Elastic Search
         es_res, es_time_taken = elastic_search(es, query)
+
+        # Trie Search
         trie_res, t_time_taken = trie_search(engine, query)
+
         print("Time Taken by Elastic Search = ", es_time_taken)
         print("Time Taken by Trie Search = ", t_time_taken)
         print("\n\nElastic search top 10 : ")
@@ -53,6 +58,8 @@ if __name__ == "__main__":
 
         actual = trie_res
         expected = es_res
+        
+        # Metrics Calculation
         metrics = {}
         try:
             metrics['tp'] = len(list(set(actual) & set(expected)))

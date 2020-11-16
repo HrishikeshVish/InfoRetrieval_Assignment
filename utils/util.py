@@ -5,6 +5,9 @@ from time import time
 import csv
 
 def string_vector(string):
+    """
+        Create vector for given string using alphabet as i-th index
+    """
     s_v = zeros(26)
     for i,j in enumerate(string):
         try:
@@ -15,6 +18,9 @@ def string_vector(string):
 
 
 def cosine_sim(a, b):
+    """
+        Calculate cosine similarity for a and b
+    """
     cos_sim = dot(a, b)/(linalg.norm(a)*linalg.norm(b))
     return cos_sim
 
@@ -29,6 +35,7 @@ def csv_to_list(path):
 
 def csvs_from_directory(path):
     """
+        Dictionary of csv data where key is csv file name
     """
     assert(os.path.isdir(path))
     csvs = os.listdir(path)
@@ -42,7 +49,10 @@ def csvs_from_directory(path):
     return doc_token
 
 
-def csv_to_json(csvFile): 
+def csv_to_json(csvFile):
+    """
+        Convert csv to json format
+    """
     data = dict()
     with open(csvFile, encoding='utf-8') as csvf: 
         csvReader = csv.DictReader(csvf)
@@ -53,6 +63,9 @@ def csv_to_json(csvFile):
 
 
 def elastic_search(es, query):
+    """
+        Run query on elastic search and return result, time_taken
+    """
     ans = []
     now = time()
     a = es.search(index="my-index", body={'query':{"match": {"Snippet":query}}}, size=3)
@@ -64,6 +77,9 @@ def elastic_search(es, query):
 
 
 def trie_search(engine, query):
+    """
+        Run query on trie search and return result, time_taken
+    """
     res, time_taken = engine.run_query(query,
                                        ranking=RANKING,
                                        ranking_algo=RANKING_ALGO,
