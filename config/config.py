@@ -25,11 +25,11 @@ LOG_FILE = "./log/log.logs"
 
 RANKING = True
 
-SHOW_DETAIL = False
+SHOW_DETAIL = True
 
 RANKING_ALGO = 'cos'
 
-TOTAL_N_RESULT = 10
+TOTAL_N_RESULT = 100
 
 SHOW_PROGRESS_BAR = False
 

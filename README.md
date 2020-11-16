@@ -1,35 +1,48 @@
-## Assignment for the Course Algorithms for Information Retrieval (UE17CS412)
-
-### Team:
-* Ashwin R. Bharadwaj
-* Hardik Gourisaria
-* Hrishikesh V
-* K Shrinidhi Bhagavath
-
 ## Trie based inverted index
 
 
-### Install Requirements
+### Install Requirements and Elastic Search
 
 ```bash
 pip3 install -r requirements.txt
+docker pull docker.elastic.co/elasticsearch/elasticsearch:7.10.0
 ```
 
 
-### Download required nltk data
+### Download required nltk data and load the elastic engine
 
 ```bash
 python3 initialize.py
 ```
 
-### How to use search engine
+### To do search on Trie Search Engine
 
 ```bash
 python3 main.py
 ```
 
+### To compare Elastic ansd Trie Search Engine
 
-### How to change search query parameter
+Open two terminals
+ - ```bash
+    docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    ```
+ - ```bash
+    python3 search.py
+    ```
+
+### To benchmark the Trie Search Engine
+
+Open two terminals
+ - ```bash
+    docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.10.0
+    ```
+ - ```bash
+    python3 benchmark.py
+    ```
+
+
+### How to change configuration
 
 Go to config.py in config directory.
 
@@ -46,32 +59,3 @@ Go to config.py in config directory.
  - REMOVE_STOP_WORDS = Boolean (True or False), If you want to remove specified stopwords
  - STOP_WORDS = set of tokens which won't we considered for indexing or for running query if REMOVE_STOP_WORDS is true
 
-### Problem Statement
-#### Problem:
- - Build a search engine for Environmental News NLP archieve.
- - Built a corpus for archieve with atleast 418 documents.
-
-#### Data:
- - Use the following link for Environmental News NLP dataset. https://www.kaggle.com/amritvirsinghx/environmental-news-nlp-dataset
-
-### Deliverables: 
-Your Code should contain functionality to 
- - Search for the terms in the query
- - Create Postings list
- - Fill the Inverted Index
- - Rank the pages
- - Retrieve the data from the dictionary
- - Query response time 
- - Measure the efficiency using precision,recall,F measure.
- 
-### Demo:
- - Run your code and carryout the search with different queries. 
- - Retrieve the data, compile and compare metrics with any one of the search engine  like Elasticsearch, Apache Solr,Apache Lucene, Google Cloud Search, Google Desktop Search for the same corpus.
- - Measure the efficiency.
-
-### Report:
- - You should submit a hard copy, 4
- - page summary of your project 
- - Your report should include the code snippet/algorithm used, similarity check of retrieved data obtained with your search engine and any one search engine like Elasticsearch,Apache Solr, Apache Lucene, Google Cloud Search, Google Desktop Search.
- - Interpretation of efficiency.
-Last para of your report should contain your observations on the Learning Outcomes of this project.

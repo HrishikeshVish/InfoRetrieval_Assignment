@@ -324,7 +324,7 @@ class InvertedIndex(object):
                 itr = tqdm(res.keys(), smoothing=0.7,
                               bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
                               desc="Getting required row from csv files and "
-                                    "calculating match score")
+                                    "calculating cos score")
 
             _now = time()
             for i_doc in itr:
@@ -468,7 +468,7 @@ class InvertedIndex(object):
                                 match_isum += tf_idf
                                 n_counter += 1
                     
-                    r['rank_points'] = match_isum*n_counter/100000
+                    r['rank_points'] = match_isum#*n_counter/100000
                     if r['rank_points'] > SCORE_THRESHOLD:
                         results.append(r)
 
@@ -476,9 +476,9 @@ class InvertedIndex(object):
             results = sorted(results, key=lambda x: x['rank_points'], reverse=True)
             results.append({})
 
-            return results[:top_n]
+            return results[:top_n], time_taken
 
-        return []
+        return [], time_taken
 
     def run_query(self, query, ranking=False, top_n=-1, ranking_algo=None, show_detail=True):
         """
@@ -498,12 +498,12 @@ class InvertedIndex(object):
                   for i in tokens if len(i) > 0]
 
         poss = set()
-
+        time_taken = {}
         itr = enumerate(set(tokens))
         if SHOW_PROGRESS_BAR:
             itr = tqdm(enumerate(set(tokens)), total=len(tokens), bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
                           desc="Searching for tokens from query in the Tire ")
-
+        _now = time()
         for i_token, token in itr:
             new_poss = self.search(token, mapped=False, lemstem=False)
             if not new_poss:
@@ -523,13 +523,14 @@ class InvertedIndex(object):
                 tokens[i_token] = replace_token
 
             poss.update(new_poss)
-
+        time_taken["Search"] = time() - _now
         if poss:
             res = {}
             itr = poss
             if SHOW_PROGRESS_BAR:
                 itr = tqdm(poss, smoothing=0.7, bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
                             desc="Mapping hashed doc to doc_is:[rows] ")
+            _now = time()
             for pos in itr:
                 doc_row = self._post2doc_mapper[pos]
 
@@ -537,7 +538,7 @@ class InvertedIndex(object):
                     res[doc_row[0]].append([doc_row[1], pos])
                 else:
                     res[doc_row[0]] = [[doc_row[1], pos]]
-
+            time_taken["Mapping back to original file"] = time() - _now
             results = []
 
             itr = res.keys()
@@ -546,7 +547,7 @@ class InvertedIndex(object):
                               bar_format='{l_bar}{bar:50}{r_bar}{bar:-50b}',
                               desc="Getting required row from csv files and "
                                     "calculating match score")
-
+            _now = time()
             for i_doc in itr:
                 if show_detail:
                     csv = read_csv(self._paths[int(i_doc)])
@@ -558,10 +559,10 @@ class InvertedIndex(object):
                         for col in csv.columns:
                             r[col] = csv[col][i_row]
                     results.append(r)
+            time_taken["Fetching data from file"] = time() - _now
+            return results[:top_n], time_taken
 
-            return results[:top_n]
-
-        return []
+        return [], time_taken
 
     def save(self, filepath):
         """
